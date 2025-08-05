@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PhishSentry | Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-6">
+
+    <h1 class="text-4xl font-bold text-green-400 mb-6">📊 Real-Time Threat Dashboard</h1>
+
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <canvas id="phishingChart" class="w-full h-64"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('phishingChart').getContext('2d');
+        let chart;
+
+        async function fetchData() {
+            const res = await fetch('/api/attempts-data');
+            const data = await res.json();
+
+            const verdictCounts = {
+                "⚠ Likely Phishing": 0,
+                "⚠ Possibly Suspicious": 0,
+                "✅ Looks Safe": 0
+            };
+
+            data.verdicts.forEach(v => verdictCounts[v] = (verdictCounts[v] || 0) + 1);
+
+            return {
+                labels: Object.keys(verdictCounts),
+                values: Object.values(verdictCounts)
+            };
+        }
+
+        async function renderChart() {
+            const { labels, values } = await fetchData();
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Phishing Verdicts',
+                        data: values,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        setInterval(renderChart, 3000);  // Refresh every 3s
+        renderChart();  // Initial load
+    </script>
+
+</body>
+</html>

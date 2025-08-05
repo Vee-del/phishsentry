@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PhishSentry - Attempt Logs</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .bg-cyber {
+            background-image: url('https://cdn.pixabay.com/photo/2019/11/08/10/34/cyber-4610993_1280.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .bg-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(3px);
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0,255,150,0.8);
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 14px rgba(0,255,150,0.5);
+        }
+    </style>
+</head>
+<body class="bg-cyber min-h-screen flex items-center justify-center text-white">
+    <div class="bg-overlay max-w-6xl w-full p-10 rounded shadow-lg">
+        <h1 class="text-4xl font-bold glow-text mb-8 text-center">📨 Logged Phishing Attempts</h1>
+
+
+        <!-- 🗂️ Attempt Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full table-auto border-collapse text-sm text-white bg-black bg-opacity-30 rounded">
+                <thead class="bg-green-700 text-white">
+                    <tr>
+                        <th class="p-3 border border-gray-600">Sender</th>
+                        <th class="p-3 border border-gray-600">Subject</th>
+                        <th class="p-3 border border-gray-600">Received</th>
+                        <th class="p-3 border border-gray-600">Preview</th>
+                        <th class="p-2 border border-gray-600">Verdict</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in attempts %}
+                    <tr class="border-t border-gray-700 hover:bg-gray-800 hover:text-green-300">
+                        <td class="p-3 border border-gray-700">{{ attempt.sender }}</td>
+                        <td class="p-3 border border-gray-700">{{ attempt.subject }}</td>
+                        <td class="p-3 border border-gray-700">{{ attempt.received_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="p-3 border border-gray-700">{{ attempt.body_preview[:50] }}...</td>
+                        <td class="p-2 border font-bold text-yellow-300">{{ attempt.verdict }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-gray-300 p-6">No phishing attempts logged yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="/" class="btn inline-block bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded">
+                ⬅ Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        async function handleScan(event) {
+            event.preventDefault();
+            const url = document.getElementById("url").value;
+
+            const response = await fetch("/scan", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url })
+            });
+
+            const data = await response.json();
+            document.getElementById("result").innerText = `Verdict: ${data.verdict}`;
+        }
+    </script>
+</body>
+</html>

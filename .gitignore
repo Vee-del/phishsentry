@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+.env
+
+# VSCode and system files
+.vscode/
+.DS_Store
+*.swp
+*.swo
+
+# PostgreSQL
+*.pgsql
+*.log
+
+# Jupyter
+.ipynb_checkpoints
+
+# Pytest / Coverage
+htmlcov/
+.coverage
+.pytest_cache/

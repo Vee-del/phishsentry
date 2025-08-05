@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Submission Successful</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .bg-cyber {
+            background-image: url('https://cdn.pixabay.com/photo/2019/11/08/10/34/cyber-4610993_1280.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .bg-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(3px);
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0,255,150,0.8);
+        }
+    </style>
+</head>
+<body class="bg-cyber min-h-screen flex items-center justify-center text-white">
+<!-- Lottie Container for Background -->
+<div id="lottie-bg" class="absolute inset-0 z-0 opacity-20 pointer-events-none"></div>
+    <div class="relative bg-overlay p-10 max-w-2xl w-full rounded-xl shadow-xl text-center z-10">
+        <h2 class="text-3xl font-bold text-green-400 glow-text mb-4">✅ Report Submitted!</h2>
+        <p class="text-lg text-gray-200 mt-4">
+    🧠 <span class="font-semibold text-yellow-300">Phishing Detector Verdict:</span>
+    <span class="text-white font-bold">{{ verdict }}</span>
+</p>
+
+        <p class="text-lg text-gray-200 mb-6">Our system analyzed the message and determined it is:</p>
+        <div class="text-2xl font-bold mb-8 text-yellow-400">{{ verdict }}</div>
+
+        <img src="https://cdn.pixabay.com/photo/2023/02/05/01/10/robot-7768527_1280.jpg" alt="AI Verdict" class="rounded-lg shadow-md mx-auto mb-6" style="max-height: 200px;">
+
+        <a href="/" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white transition transform hover:scale-105"> Back to Home</a>
+    </div>
+<!-- LottieScript -->
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<script>
+    const container = document.getElementById("lottie-bg");
+    const player = document.createElement("lottie-player");
+
+    player.setAttribute("src", "https://assets10.lottiefiles.com/packages/lf20_tno6cg2w.json");
+    player.setAttribute("background", "transparent");
+    player.setAttribute("speed", "1");
+    player.setAttribute("loop", "");
+    player.setAttribute("autoplay", "");
+    player.style.width = "100%";
+    player.style.height = "100%";
+    container.appendChild(player);
+</script>
+</body>
+</html>
