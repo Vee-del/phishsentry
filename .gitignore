@@ -31,6 +31,7 @@ htmlcov/
 
 # Ignore large SDKs, temp files, and system artifacts
 google-cloud-sdk/
+google-cloud*
 *.tar.gz
 *.zip
 *.pyc
