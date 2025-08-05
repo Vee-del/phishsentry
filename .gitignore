@@ -27,3 +27,11 @@ venv/
 htmlcov/
 .coverage
 .pytest_cache/
+
+
+# Ignore large SDKs, temp files, and system artifacts
+google-cloud-sdk/
+*.tar.gz
+*.zip
+*.pyc
+EOF
