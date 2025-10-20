@@ -1,80 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>PhishSentry | Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>PhishSentry Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-6">
+<body class="bg-gray-50 text-gray-800">
+  <header class="bg-blue-900 text-white p-4">
+    <h1 class="text-2xl font-bold">PhishSentry — Threat Intelligence Dashboard</h1>
+  </header>
 
-    <h1 class="text-4xl font-bold text-green-400 mb-6">📊 Real-Time Threat Dashboard</h1>
+  <main class="max-w-6xl mx-auto py-10 space-y-8">
+    <!-- Stats Cards -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-white shadow-md p-5 rounded-lg text-center">
+        <h2 class="text-gray-600 text-sm uppercase">Total Attempts</h2>
+        <p id="totalAttempts" class="text-3xl font-bold text-blue-700 mt-2">--</p>
+      </div>
+      <div class="bg-white shadow-md p-5 rounded-lg text-center">
+        <h2 class="text-gray-600 text-sm uppercase">Last 24 Hours</h2>
+        <p id="last24h" class="text-3xl font-bold text-green-600 mt-2">--</p>
+      </div>
+      <div class="bg-white shadow-md p-5 rounded-lg text-center">
+        <h2 class="text-gray-600 text-sm uppercase">Active Monitor</h2>
+        <p class="text-3xl font-bold text-indigo-600 mt-2">Live</p>
+      </div>
+    </section>
 
-    <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-        <canvas id="phishingChart" class="w-full h-64"></canvas>
-    </div>
+    <!-- Chart -->
+    <section class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-lg font-semibold mb-4">Phishing Attempts — Last 24 Hours</h2>
+      <canvas id="attemptChart" height="90"></canvas>
+    </section>
 
-    <script>
-        const ctx = document.getElementById('phishingChart').getContext('2d');
-        let chart;
+    <!-- Recent Attempts -->
+    <section class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-lg font-semibold mb-4">Recent Attempts</h2>
+      <div id="recentList" class="space-y-3 text-sm text-gray-700">
+        <p>Loading recent attempts...</p>
+      </div>
+    </section>
+  </main>
 
-        async function fetchData() {
-            const res = await fetch('/api/attempts-data');
-            const data = await res.json();
+  <script>
+    async function loadDashboardData() {
+      try {
+        const response = await fetch("/api/attempts-data");
+        const data = await response.json();
 
-            const verdictCounts = {
-                "⚠ Likely Phishing": 0,
-                "⚠ Possibly Suspicious": 0,
-                "✅ Looks Safe": 0
-            };
+        // Summary
+        document.getElementById("totalAttempts").innerText = data.summary.total_attempts;
+        document.getElementById("last24h").innerText = data.summary.last_24h;
 
-            data.verdicts.forEach(v => verdictCounts[v] = (verdictCounts[v] || 0) + 1);
+        // Chart
+        const ctx = document.getElementById("attemptChart").getContext("2d");
+        const labels = data.series.map(x => new Date(x.bucket).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}));
+        const values = data.series.map(x => x.count);
 
-            return {
-                labels: Object.keys(verdictCounts),
-                values: Object.values(verdictCounts)
-            };
-        }
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [{
+              label: "Attempts",
+              data: values,
+              borderColor: "rgb(59, 130, 246)",
+              backgroundColor: "rgba(59, 130, 246, 0.2)",
+              borderWidth: 2,
+              fill: true,
+              tension: 0.3,
+            }],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              y: { beginAtZero: true },
+              x: { ticks: { autoSkip: true, maxTicksLimit: 8 } },
+            },
+          },
+        });
 
-        async function renderChart() {
-            const { labels, values } = await fetchData();
+      } catch (error) {
+        console.error("Dashboard data load failed:", error);
+      }
+    }
 
-            if (chart) chart.destroy();
+    async function fetchRecentAttempts() {
+      try {
+        const res = await fetch("/api/recent-attempts");
+        const data = await res.json();
+        const container = document.getElementById("recentList");
+        container.innerHTML = "";
+        data.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "p-3 border rounded hover:bg-gray-50 transition";
+          div.innerHTML = `
+            <div class="flex justify-between">
+              <strong>${item.sender}</strong>
+              <span class="text-xs text-gray-500">${new Date(item.received_at).toLocaleString()}</span>
+            </div>
+            <p class="text-gray-700 truncate">${item.subject || "(no subject)"}</p>
+            <span class="text-xs px-2 py-1 rounded ${
+              item.verdict.includes("Phishing")
+                ? "bg-red-100 text-red-700"
+                : "bg-green-100 text-green-700"
+            }">
+              ${item.verdict}
+            </span>
+          `;
+          container.appendChild(div);
+        });
+      } catch (e) {
+        console.error("Recent fetch failed:", e);
+      }
+    }
 
-            chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Phishing Verdicts',
-                        data: values,
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.7)',
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        setInterval(renderChart, 3000);  // Refresh every 3s
-        renderChart();  // Initial load
-    </script>
-
+    loadDashboardData();
+    fetchRecentAttempts();
+    setInterval(fetchRecentAttempts, 15000);
+  </script>
 </body>
 </html>
