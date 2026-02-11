@@ -12,6 +12,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(phishing.router)
 app.include_router(dashboard.router)
 
+
 @app.get("/", response_class=HTMLResponse)
 def home():
     return """
@@ -25,16 +26,24 @@ def home():
         <style>
             body {
                 font-family: 'Inter', sans-serif;
-                background-color: #020617;
-                color: #e5e7eb;
+                background-image:
+                    url('https://cdn.pixabay.com/photo/2019/11/08/10/34/cyber-4610993_1280.jpg');
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+
             }
-            .hero-bg {
-                background: radial-gradient(circle at 20% 30%, rgba(0,255,200,0.15) 0%, transparent 80%),
-                            radial-gradient(circle at 80% 70%, rgba(0,255,150,0.2) 0%, transparent 70%);
+
+            .bg-overlay {
+                background-color: rgba(0, 0, 0, 7.0);
+                backdrop-filter: blur(3px);
             }
+
             .glow-text {
-                text-shadow: 0 0 15px rgba(0,255,150,0.8);
+                color: #000;
+                text-shadow: 0 0 15px rgba(0,255,150,0.5);
             }
+
             .btn-cyber {
                 background: linear-gradient(90deg, #00ff9d, #00c7ff);
                 color: #000;
@@ -43,12 +52,14 @@ def home():
                 font-weight: bold;
                 transition: all 0.3s ease;
             }
+
             .btn-cyber:hover {
                 transform: scale(1.07);
                 box-shadow: 0 0 15px rgba(0,255,150,0.7);
             }
+
             .terminal-box {
-                background: rgba(0, 0, 0, 0.7);
+                background: rgba(0, 0, 0, 0.65);
                 border: 1px solid rgba(0,255,150,0.3);
                 border-radius: 10px;
                 padding: 20px;
@@ -57,16 +68,18 @@ def home():
                 overflow: hidden;
                 box-shadow: 0 0 20px rgba(0,255,150,0.1);
             }
+
             .blink {
                 animation: blink 1s step-start infinite;
             }
+
             @keyframes blink {
                 50% { opacity: 0; }
             }
         </style>
     </head>
 
-    <body class="hero-bg min-h-screen flex flex-col items-center justify-center text-center px-6">
+    <body class="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-overlay">
         <header class="mb-10">
             <h1 class="text-6xl font-extrabold text-green-400 glow-text">PhishSentry</h1>
             <p class="text-gray-300 text-lg mt-3">AI-Powered. Real-Time. Cyber-Ready.</p>
